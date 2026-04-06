@@ -15,18 +15,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     :root {
-      --bg: #0d0d1a;
-      --surface: #141428;
-      --border: #1e1e3a;
-      --border-hover: #2d2d50;
-      --text: #e8e8f0;
-      --muted: #6b7280;
-      --dim: #374151;
-      --purple: #a78bfa;
-      --purple-dim: rgba(167,139,250,0.12);
-      --blue: #38bdf8;
-      --blue-dim: rgba(56,189,248,0.12);
-      --green: #34d399;
+      --bg: #0a0f0a;
+      --surface: #0d120d;
+      --border: #1a3320;
+      --border-hover: #254830;
+      --text: #eaffee;
+      --muted: #006638;
+      --dim: #2a4030;
+      --purple: #00ff7b;
+      --purple-dim: rgba(0,255,123,0.12);
+      --blue: #76D1DE;
+      --blue-dim: rgba(118,209,222,0.12);
+      --green: #00ff7b;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
@@ -250,7 +250,7 @@
     }
     .confirm-btn:active { opacity: 0.8; }
     .confirm-purple { background: var(--purple); }
-    .confirm-blue { background: var(--blue); color: #0d0d1a; }
+    .confirm-blue { background: var(--blue); color: #0a0f0a; }
 
     /* ENTRIES */
     .entry-list { display: flex; flex-direction: column; gap: 6px; }
@@ -576,9 +576,9 @@ function renderToday(data) {
       <div class="ring-card" id="ring-protein">
         <div class="ring-label">Protein</div>
         <div class="ring-svg-wrap">
-          ${makeSVGRing(totalProtein, PROTEIN_GOAL, '#a78bfa', 108, 9)}
+          ${makeSVGRing(totalProtein, PROTEIN_GOAL, '#00ff7b', 108, 9)}
           <div class="ring-center">
-            <div class="ring-value" style="color:#a78bfa">${Math.round(totalProtein)}g</div>
+            <div class="ring-value" style="color:#00ff7b">${Math.round(totalProtein)}g</div>
             <div class="ring-pct">${pPct}%</div>
           </div>
         </div>
@@ -587,9 +587,9 @@ function renderToday(data) {
       <div class="ring-card" id="ring-water">
         <div class="ring-label">Water</div>
         <div class="ring-svg-wrap">
-          ${makeSVGRing(totalWater, WATER_GOAL, '#38bdf8', 108, 9)}
+          ${makeSVGRing(totalWater, WATER_GOAL, '#76D1DE', 108, 9)}
           <div class="ring-center">
-            <div class="ring-value" style="color:#38bdf8">${Math.round(totalWater)}oz</div>
+            <div class="ring-value" style="color:#76D1DE">${Math.round(totalWater)}oz</div>
             <div class="ring-pct">${wPct}%</div>
           </div>
         </div>
@@ -640,12 +640,12 @@ function renderWeek() {
         <div class="bar-rows">
           <div class="bar-row">
             <span class="bar-label">Protein</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${pPct}%;background:#a78bfa"></div></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pPct}%;background:#00ff7b"></div></div>
             <span class="bar-val ${pMet ? 'goal-met' : ''}">${Math.round(p)}g</span>
           </div>
           <div class="bar-row">
             <span class="bar-label">Water</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${wPct}%;background:#38bdf8"></div></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${wPct}%;background:#76D1DE"></div></div>
             <span class="bar-val ${wMet ? 'goal-met' : ''}">${Math.round(w)}oz</span>
           </div>
         </div>
