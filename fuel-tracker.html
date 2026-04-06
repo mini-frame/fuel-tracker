@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Fuel" />
+  <meta name="theme-color" content="#0d0d1a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="fuel-icon.svg" />
+  <title>Fuel Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg: #0d0d1a;
+      --surface: #141428;
+      --border: #1e1e3a;
+      --border-hover: #2d2d50;
+      --text: #e8e8f0;
+      --muted: #6b7280;
+      --dim: #374151;
+      --purple: #a78bfa;
+      --purple-dim: rgba(167,139,250,0.12);
+      --blue: #38bdf8;
+      --blue-dim: rgba(56,189,248,0.12);
+      --green: #34d399;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    .header {
+      padding: 18px 20px 14px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(90deg, var(--purple), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-date {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      letter-spacing: 0.3px;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 10px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px 0;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--border);
+      color: var(--purple);
+      font-weight: 600;
+    }
+
+    /* SCROLL BODY */
+    .body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 16px 32px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* RINGS */
+    .rings {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .ring-card {
+      flex: 1;
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      transition: border-color 0.4s, box-shadow 0.4s;
+      position: relative;
+      overflow: hidden;
+    }
+    .ring-card.pulse-purple {
+      border-color: var(--purple);
+      box-shadow: 0 0 24px rgba(167,139,250,0.2);
+    }
+    .ring-card.pulse-blue {
+      border-color: var(--blue);
+      box-shadow: 0 0 24px rgba(56,189,248,0.2);
+    }
+    .ring-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .ring-svg-wrap { position: relative; }
+    .ring-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .ring-value { font-size: 20px; font-weight: 700; }
+    .ring-pct { font-size: 10px; color: var(--muted); }
+    .ring-goal { font-size: 10px; color: var(--dim); }
+
+    /* SECTION */
+    .section { margin-bottom: 22px; }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .add-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 13px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .add-btn:active { opacity: 0.7; }
+    .add-btn-purple { background: var(--purple-dim); color: var(--purple); }
+    .add-btn-blue { background: var(--blue-dim); color: var(--blue); }
+
+    /* ADD PANEL */
+    .add-panel {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .preset-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .preset-btn:active { opacity: 0.7; }
+    .preset-purple { background: var(--purple-dim); color: var(--purple); }
+    .preset-blue { background: var(--blue-dim); color: var(--blue); }
+    .input-row { display: flex; gap: 8px; }
+    .input-field {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 9px 12px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      min-width: 0;
+    }
+    .input-field:focus { border-color: var(--border-hover); }
+    .input-field::placeholder { color: var(--dim); }
+    .confirm-btn {
+      border: none;
+      border-radius: 9px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      color: #fff;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .confirm-btn:active { opacity: 0.8; }
+    .confirm-purple { background: var(--purple); }
+    .confirm-blue { background: var(--blue); color: #0d0d1a; }
+
+    /* ENTRIES */
+    .entry-list { display: flex; flex-direction: column; gap: 6px; }
+    .entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-radius: 11px;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .entry-name { font-size: 13px; font-weight: 500; }
+    .entry-time { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .entry-right { display: flex; align-items: center; gap: 10px; }
+    .entry-amt { font-size: 15px; font-weight: 700; }
+    .entry-amt-purple { color: var(--purple); }
+    .entry-amt-blue { color: var(--blue); }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--dim);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 2px 4px;
+      transition: color 0.15s;
+    }
+    .remove-btn:active { color: #ef4444; }
+    .empty { text-align: center; color: var(--dim); font-size: 13px; padding: 18px 0; }
+
+    /* WEEK TAB */
+    .week-intro { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+    .week-card {
+      background: var(--surface);
+      border-radius: 13px;
+      padding: 13px 15px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+    .week-card.today { border-color: #2d2d50; }
+    .week-date {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .today-badge {
+      font-size: 10px;
+      background: var(--purple-dim);
+      color: var(--purple);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-weight: 600;
+    }
+    .week-date.today-date { color: var(--purple); }
+    .bar-rows { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { font-size: 11px; color: var(--muted); width: 48px; flex-shrink: 0; }
+    .bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+    .bar-val { font-size: 11px; color: var(--muted); width: 42px; text-align: right; flex-shrink: 0; }
+    .goal-met { color: var(--green) !important; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: calc(24px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e1e3a;
+      border: 1px solid var(--border-hover);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      z-index: 999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-title">FUEL TRACKER</div>
+    <div class="header-date" id="header-date"></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('today')">Today</button>
+    <button class="tab" onclick="switchTab('week')">Weekly</button>
+  </div>
+  <div class="body" id="body"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const PROTEIN_GOAL = 140;
+const WATER_GOAL = 90;
+
+const PROTEIN_PRESETS = [
+  { label: "Chicken breast (4oz)", amount: 35 },
+  { label: "Protein shake", amount: 25 },
+  { label: "Ground beef (4oz)", amount: 28 },
+  { label: "Tuna (3oz)", amount: 22 },
+  { label: "Greek yogurt (1 cup)", amount: 17 },
+  { label: "Cottage cheese (½ cup)", amount: 14 },
+  { label: "Eggs (2)", amount: 12 },
+];
+
+const WATER_PRESETS = [
+  { label: "8 oz glass", amount: 8 },
+  { label: "16 oz bottle", amount: 16 },
+  { label: "24 oz bottle", amount: 24 },
+  { label: "32 oz bottle", amount: 32 },
+];
+
+let currentTab = 'today';
+let addingProtein = false;
+let addingWater = false;
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getWeekKeys() {
+  const keys = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    keys.push(d.toISOString().slice(0, 10));
+  }
+  return keys;
+}
+
+function getDayData(key) {
+  const raw = localStorage.getItem('fuel_' + key);
+  return raw ? JSON.parse(raw) : { protein: [], water: [] };
+}
+
+function saveDayData(key, data) {
+  localStorage.setItem('fuel_' + key, JSON.stringify(data));
+}
+
+function formatDate(key) {
+  const today = getTodayKey();
+  const [y, m, d] = key.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  const yest = new Date(); yest.setDate(yest.getDate() - 1);
+  const yesterdayKey = yest.toISOString().slice(0, 10);
+  if (key === today) return 'Today';
+  if (key === yesterdayKey) return 'Yesterday';
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function formatHeaderDate() {
+  return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function pulseCard(type) {
+  const cls = type === 'protein' ? 'pulse-purple' : 'pulse-blue';
+  const card = document.getElementById('ring-' + type);
+  if (!card) return;
+  card.classList.add(cls);
+  setTimeout(() => card.classList.remove(cls), 700);
+}
+
+function addEntry(type, amount, label) {
+  const amt = parseFloat(amount);
+  if (!amt || amt <= 0) return;
+  const todayKey = getTodayKey();
+  const data = getDayData(todayKey);
+  const unit = type === 'protein' ? 'g' : 'oz';
+  data[type].push({
+    id: Date.now(),
+    amount: amt,
+    label: label || `${amt}${unit}`,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  saveDayData(todayKey, data);
+  if (type === 'protein') addingProtein = false;
+  else addingWater = false;
+  showToast(`+${amt}${unit} logged!`);
+  render();
+  pulseCard(type);
+}
+
+function removeEntry(type, id) {
+  const todayKey = getTodayKey();
+  const data = getDayData(todayKey);
+  data[type] = data[type].filter(e => e.id !== id);
+  saveDayData(todayKey, data);
+  render();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  addingProtein = false;
+  addingWater = false;
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', (i === 0 && tab === 'today') || (i === 1 && tab === 'week'));
+  });
+  render();
+}
+
+function toggleAdding(type) {
+  if (type === 'protein') addingProtein = !addingProtein;
+  else addingWater = !addingWater;
+  render();
+  if (type === 'protein' && addingProtein) setTimeout(() => document.getElementById('protein-label-input')?.focus(), 50);
+  if (type === 'water' && addingWater) setTimeout(() => document.getElementById('water-label-input')?.focus(), 50);
+}
+
+function makeSVGRing(value, max, color, size, strokeWidth) {
+  const radius = (size - strokeWidth) / 2;
+  const circ = 2 * Math.PI * radius;
+  const pct = Math.min(value / max, 1);
+  const offset = circ * (1 - pct);
+  const cx = size / 2, cy = size / 2;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
+    <circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="#1e1e3a" stroke-width="${strokeWidth}"/>
+    <circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}"
+      stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+      style="transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1)"/>
+  </svg>`;
+}
+
+function renderToday(data) {
+  const totalProtein = data.protein.reduce((s, e) => s + e.amount, 0);
+  const totalWater = data.water.reduce((s, e) => s + e.amount, 0);
+  const pPct = Math.round((totalProtein / PROTEIN_GOAL) * 100);
+  const wPct = Math.round((totalWater / WATER_GOAL) * 100);
+
+  const pEntries = [...data.protein].reverse().map(e => `
+    <div class="entry">
+      <div>
+        <div class="entry-name">${e.label}</div>
+        <div class="entry-time">${e.time}</div>
+      </div>
+      <div class="entry-right">
+        <span class="entry-amt entry-amt-purple">${e.amount}g</span>
+        <button class="remove-btn" onclick="removeEntry('protein', ${e.id})">×</button>
+      </div>
+    </div>`).join('') || '<div class="empty">Nothing logged yet</div>';
+
+  const wEntries = [...data.water].reverse().map(e => `
+    <div class="entry">
+      <div>
+        <div class="entry-name">${e.label}</div>
+        <div class="entry-time">${e.time}</div>
+      </div>
+      <div class="entry-right">
+        <span class="entry-amt entry-amt-blue">${e.amount}oz</span>
+        <button class="remove-btn" onclick="removeEntry('water', ${e.id})">×</button>
+      </div>
+    </div>`).join('') || '<div class="empty">Nothing logged yet</div>';
+
+  const pPresets = PROTEIN_PRESETS.map(p =>
+    `<button class="preset-btn preset-purple" onclick="addEntry('protein', ${p.amount}, '${p.label}')">${p.label} · ${p.amount}g</button>`
+  ).join('');
+
+  const wPresets = WATER_PRESETS.map(p =>
+    `<button class="preset-btn preset-blue" onclick="addEntry('water', ${p.amount}, '${p.label}')">${p.label}</button>`
+  ).join('');
+
+  const pPanel = addingProtein ? `
+    <div class="add-panel">
+      <div class="presets">${pPresets}</div>
+      <div class="input-row">
+        <input id="protein-label-input" class="input-field" placeholder="Custom label" style="flex:2" />
+        <input id="protein-amt-input" class="input-field" placeholder="grams" type="number" inputmode="decimal" style="flex:1" 
+          onkeydown="if(event.key==='Enter'){addEntry('protein',document.getElementById('protein-amt-input').value,document.getElementById('protein-label-input').value)}" />
+        <button class="confirm-btn confirm-purple" onclick="addEntry('protein',document.getElementById('protein-amt-input').value,document.getElementById('protein-label-input').value)">Add</button>
+      </div>
+    </div>` : '';
+
+  const wPanel = addingWater ? `
+    <div class="add-panel">
+      <div class="presets">${wPresets}</div>
+      <div class="input-row">
+        <input id="water-label-input" class="input-field" placeholder="Custom label" style="flex:2" />
+        <input id="water-amt-input" class="input-field" placeholder="oz" type="number" inputmode="decimal" style="flex:1"
+          onkeydown="if(event.key==='Enter'){addEntry('water',document.getElementById('water-amt-input').value,document.getElementById('water-label-input').value)}" />
+        <button class="confirm-btn confirm-blue" onclick="addEntry('water',document.getElementById('water-amt-input').value,document.getElementById('water-label-input').value)">Add</button>
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="rings">
+      <div class="ring-card" id="ring-protein">
+        <div class="ring-label">Protein</div>
+        <div class="ring-svg-wrap">
+          ${makeSVGRing(totalProtein, PROTEIN_GOAL, '#a78bfa', 108, 9)}
+          <div class="ring-center">
+            <div class="ring-value" style="color:#a78bfa">${Math.round(totalProtein)}g</div>
+            <div class="ring-pct">${pPct}%</div>
+          </div>
+        </div>
+        <div class="ring-goal">Goal: ${PROTEIN_GOAL}g</div>
+      </div>
+      <div class="ring-card" id="ring-water">
+        <div class="ring-label">Water</div>
+        <div class="ring-svg-wrap">
+          ${makeSVGRing(totalWater, WATER_GOAL, '#38bdf8', 108, 9)}
+          <div class="ring-center">
+            <div class="ring-value" style="color:#38bdf8">${Math.round(totalWater)}oz</div>
+            <div class="ring-pct">${wPct}%</div>
+          </div>
+        </div>
+        <div class="ring-goal">Goal: ${WATER_GOAL}oz</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">🥩 Protein Log</span>
+        <button class="add-btn add-btn-purple" onclick="toggleAdding('protein')">${addingProtein ? 'Cancel' : '+ Add'}</button>
+      </div>
+      ${pPanel}
+      <div class="entry-list">${pEntries}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">💧 Water Log</span>
+        <button class="add-btn add-btn-blue" onclick="toggleAdding('water')">${addingWater ? 'Cancel' : '+ Add'}</button>
+      </div>
+      ${wPanel}
+      <div class="entry-list">${wEntries}</div>
+    </div>
+  `;
+}
+
+function renderWeek() {
+  const todayKey = getTodayKey();
+  const keys = getWeekKeys();
+
+  const cards = keys.map(key => {
+    const data = getDayData(key);
+    const p = data.protein.reduce((s, e) => s + e.amount, 0);
+    const w = data.water.reduce((s, e) => s + e.amount, 0);
+    const pPct = Math.min((p / PROTEIN_GOAL) * 100, 100);
+    const wPct = Math.min((w / WATER_GOAL) * 100, 100);
+    const isToday = key === todayKey;
+    const pMet = p >= PROTEIN_GOAL;
+    const wMet = w >= WATER_GOAL;
+
+    return `
+      <div class="week-card ${isToday ? 'today' : ''}">
+        <div class="week-date ${isToday ? 'today-date' : ''}">
+          ${formatDate(key)}
+          ${isToday ? '<span class="today-badge">TODAY</span>' : ''}
+        </div>
+        <div class="bar-rows">
+          <div class="bar-row">
+            <span class="bar-label">Protein</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pPct}%;background:#a78bfa"></div></div>
+            <span class="bar-val ${pMet ? 'goal-met' : ''}">${Math.round(p)}g</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Water</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${wPct}%;background:#38bdf8"></div></div>
+            <span class="bar-val ${wMet ? 'goal-met' : ''}">${Math.round(w)}oz</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="week-intro">Values shown in green have hit their daily goal. Purple = Protein · Blue = Water</div>
+    ${cards}
+  `;
+}
+
+function render() {
+  const todayKey = getTodayKey();
+  const data = getDayData(todayKey);
+  document.getElementById('header-date').textContent = formatHeaderDate();
+  document.getElementById('body').innerHTML = currentTab === 'today' ? renderToday(data) : renderWeek();
+}
+
+render();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
+</body>
+</html>

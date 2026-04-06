@@ -1,0 +1,19 @@
+{
+  "name": "Fuel Tracker",
+  "short_name": "Fuel",
+  "description": "Daily protein and water tracker",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "./fuel-tracker.html",
+  "scope": "./",
+  "background_color": "#0d0d1a",
+  "theme_color": "#0d0d1a",
+  "icons": [
+    {
+      "src": "fuel-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
